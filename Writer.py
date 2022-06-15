@@ -1,5 +1,6 @@
-from operator import truediv
+import os
 import WriterClass
+import Code_Names
 
 
 
@@ -10,13 +11,65 @@ while True:
     izbor = int(input())
 
     if izbor == 1:
-        #ovde radimo upis novih podataka
-        print("1")
+        os.system('CLS')
+        while True:
+            print("Izaberite kod:\n 1.CODE_ANALOG\n 2.CODE_DIGITAL\n 3.CODE_CUSTOM\n 4.CODE_LIMITSET\n 5.CODE_SINGLENOE\n 6.CODE_MULTIPLENODE\n 7.CODE_CONSUMER\n 8.CODE_SOURCE\n");
+            izbor2 = int(input())
+            if izbor2 == 1:
+                code = "CODE_ANALOG"
+                print("Unesite value:")
+                value= int(input())
+                
+                break;
+            elif izbor2 == 2:
+                code = "CODE_DIGITAL"
+                print("Unesite value:")
+                value= int(input()) 
+                break;
+            elif izbor2 == 3:
+                code = "CODE_CUSTOM"
+                print("Unesite value:")
+                value= int(input())
+                break;
+            elif izbor2 == 4:
+                code = "CODE_LIMITSET"
+                print("Unesite value:")
+                value= int(input())
+                break;
+            elif izbor2 == 5:
+                code = "CODE_SINGLENOE"
+                print("Unesite value:")
+                value= int(input())
+                break;
+            elif izbor2 == 6:
+                code = "CODE_MULTIPLENODE"
+                print("Unesite value:")
+                value= int(input())
+                break;
+            elif izbor2 == 7:
+                code = "CODE_CONSUMER"
+                print("Unesite value:")
+                value= int(input())
+                break;
+                print(code)
+            elif izbor2 == 8:
+                code= "CODE_SOURCE"
+                print("Unesite value:")
+                value= int(input())
+                break;
+            else:
+                print("Izaberite redni broj zeljene koda!\n\n")
+
+
+        
+        
     elif izbor == 2:
+        os.system('CLS')
         #ovde radimo paljenje i gasenje
         print("2")
-    elif izbor == 3:
         
+    elif izbor == 3:
+        os.system('CLS')
         print("3")
         break;
     else:
