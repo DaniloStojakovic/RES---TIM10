@@ -1,6 +1,17 @@
+import pickle
 import os
-import WriterClass
 import Code_Names
+import socket
+from time import sleep
+from WriterClass import WriterClass
+
+
+ClientSocket2 = socket.socket()
+host2 = 'localhost'
+port2 = 5555
+ClientSocket2.connect((host2, port2))
+
+
 
 
 
@@ -19,7 +30,9 @@ while True:
                 code = "CODE_ANALOG"
                 print("Unesite value:")
                 value= int(input())
-                
+                message = WriterClass(code, value)
+                data_string = pickle.dumps(message)
+                ClientSocket2.send(data_string)
                 break;
             elif izbor2 == 2:
                 code = "CODE_DIGITAL"
