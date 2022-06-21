@@ -117,24 +117,25 @@ while True:
             print("Izaberite jednu od opcija: \n 1.Paljenje workera \n 2.Gasenje workera \n")
             izbor3 = int(input())
             if izbor3 == 1:
+                os.system('CLS')
                 print("Izaberite redni broj workera koji zelite da upalite: \n")
                 izbor4= int(input())
                 if(izbor4> 4):
                     print("Morate uneti broj do 4!\n")
-                    break;
+                    continue
                 else:
                     upaljen = "ON"
                     poruka2 = WriterClass(upaljen, izbor4)
                     zaSlanje2 = pickle.dumps(poruka2)
                     ClientSocket2.send(zaSlanje2)              
-                break;
+                break
             elif izbor3 == 2:
                 os.system('CLS')
                 print("Izaberite redni broj workera koji zelite da ugasite: \n")
                 izbor4= int(input())
                 if(izbor4> 4):
                     print("Morate uneti broj do 4!\n")
-                    break;
+                    continue
                 else:
                     upaljen = "OFF"
                     poruka2 = WriterClass(upaljen, izbor4)
