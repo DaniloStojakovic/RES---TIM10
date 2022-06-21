@@ -31,10 +31,3 @@ logger.addHandler(ch)
 #2005-03-19 15:10:26,695 - simple_example - WARNING - warn message
 #2005-03-19 15:10:26,697 - simple_example - ERROR - error message
 #2005-03-19 15:10:26,773 - simple_example - CRITICAL - critical message
-
-
-
-
-
-
-
