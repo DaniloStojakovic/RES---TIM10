@@ -1,46 +1,21 @@
-from copyreg import pickle
+import pickle
 import os
-import WriterClass
 import Code_Names
 import socket
 from time import sleep
-
-ClientSocket = socket.socket()
-host = '127.0.0.1'
-port = 2000
-ClientSocket.connect(host, port)
-
-
-Stanja = []
-
-Stanja.append("ON")
-Stanja.append("ON")
-Stanja.append("ON")
-Stanja.append("ON")
-
-stanje1 = Stanja
-
-
-print(f"Stanja workera na pocetku su: {Stanja}")
-
-zaSlanjeStanje = pickle.dumps(stanje1)
-
-ClientSocket.send(zaSlanjeStanje)
-ClientSocket.connect('127.0.0.1', 2002)
+from WriterClass import WriterClass
 
 
 ClientSocket2 = socket.socket()
-host2 = '127.0.0.2'
-port2 = 2003
-ClientSocket.connect(host2, port2)
+host2 = 'localhost'
+port2 = 5555
+ClientSocket2.connect((host2, port2))
 
 
 
 
 
 while True:
-
-    sleep(2)
 
     print("Izaberite jednu od opcija: \n 1. Upis novih podataka \n 2. Paljenje i gasenje workera \n 3. Izlaz \n ")
 
