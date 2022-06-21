@@ -3,9 +3,10 @@ import socket
 import select
 import random
 from itertools import cycle
+import pickle
+from WriterClass import WriterClass
 
-# $ ~  while  python server.py
-SERVER_POOL = [('localhost', 4000), ('localhost', 5000)]
+SERVER_POOL = [('localhost', 4000), ('localhost', 5000), ('localhost', 6000), ('localhost', 7000)]
 
 ITER = cycle(SERVER_POOL)
 def round_robin(iter):
@@ -13,19 +14,6 @@ def round_robin(iter):
 
 
 class LoadBalancer(object):
-    """ Socket implementation of a load balancer.
-    Flow Diagram:
-    +---------------+      +-----------------------------------------+      +---------------+
-    | client socket | <==> | client-side socket | server-side socket | <==> | server socket |
-    |   <client>    |      |          < load balancer >              |      |    <server>   |
-    +---------------+      +-----------------------------------------+      +---------------+
-    Attributes:
-        ip (str): virtual server's ip; client-side socket's ip
-        port (int): virtual server's port; client-side socket's port
-        algorithm (str): algorithm used to select a server
-        flow_table (dict): mapping of client socket obj <==> server-side socket obj
-        sockets (list): current connected and open socket obj
-    """
 
     flow_table = dict()
     sockets = list()
@@ -34,22 +22,36 @@ class LoadBalancer(object):
         self.ip = ip
         self.port = port
         self.algorithm = algorithm
-
-        # init a client-side socket
         self.cs_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # the SO_REUSEADDR flag tells the kernel to reuse a local socket in TIME_WAIT state,
-        # without waiting for its natural timeout to expire.
         self.cs_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.cs_socket.bind((self.ip, self.port))
-      # print ('init client-side socket: %s') % (self.cs_socket.getsockname(),)
-        self.cs_socket.listen(10) # max connections
+        self.cs_socket.listen(1)
         self.sockets.append(self.cs_socket)
 
     def start(self):
+        client_socket, client_addr = self.cs_socket.accept()
+        print ('='*40+'flow start'+'='*39)
+        print('Client connected: %s', client_addr)
+
         while True:
-            print('pre selecta')
+            #server_ip, server_port = self.select_server(SERVER_POOL, self.algorithm)
+            #ss_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            #ss_socket.connect((server_ip, server_port))
+            data = client_socket.recv(4096)
+            #self.on_recv(client_socket, data)
+            #ss_socket.send(data)
+            data1 = pickle.loads(data)
+            if not data1:
+                # if data is not received break
+                break
+            item = WriterClass(data1.code, data1.value)
+            print(f" code:{item.code}  lista vrednost: {item.value}\n")
+            # else:
+            #     self.on_close(client_socket)
+            #     break
+
+        while True:
             read_list, write_list, exception_list = select.select(self.sockets, [], [])
-            print('posle selecta')
             for sock in read_list:
                 # new connection
                 if sock == self.cs_socket:
@@ -73,9 +75,6 @@ class LoadBalancer(object):
 
     def on_accept(self):
         client_socket, client_addr = self.cs_socket.accept()
-        # print ('client connected: %s <==> %s') % (client_addr, self.cs_socket.getsockname())
-
-        # select a server that forwards packets to
         server_ip, server_port = self.select_server(SERVER_POOL, self.algorithm)
 
         # init a server-side socket
@@ -100,9 +99,9 @@ class LoadBalancer(object):
         print ('recving packets: %-20s ==> %-20s, data: %s') % (sock.getpeername(), sock.getsockname(), [data])
         # data can be modified before forwarding to server
         # lots of add-on features can be added here
-        remote_socket = self.flow_table[sock]
-        remote_socket.send(data)
-        print ('sending packets: %-20s ==> %-20s, data: %s') % (remote_socket.getsockname(), remote_socket.getpeername(), [data])
+        #remote_socket = self.flow_table[sock]
+        #remote_socket.send(data)
+        #print ('sending packets: %-20s ==> %-20s, data: %s') % (remote_socket.getsockname(), remote_socket.getpeername(), [data])
 
     def on_close(self, sock):
         #print ('client %s has disconnected') % (sock.getpeername(),)
@@ -116,8 +115,8 @@ class LoadBalancer(object):
         sock.close()  # close connection with client
         ss_socket.close()  # close connection with server
 
-        del self.flow_table[sock]
-        del self.flow_table[ss_socket]
+        #del self.flow_table[sock]
+        #del self.flow_table[ss_socket]
 
     def select_server(self, server_list, algorithm):
         if algorithm == 'random':
@@ -127,8 +126,6 @@ class LoadBalancer(object):
         else:
             raise Exception('unknown algorithm: %s' % algorithm)
 
-
-#if __name__ == '__main__':
 try:
     LoadBalancer('localhost', 5555, 'round robin').start()
 except KeyboardInterrupt:
