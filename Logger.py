@@ -5,7 +5,7 @@ logger = logging.getLogger('logFile')
 logger.setLevel(logging.DEBUG)
 
 # create console handler and set level to debug
-ch = logging.StreamHandler()
+ch = logging.FileHandler('logFile.txt')
 ch.setLevel(logging.DEBUG)
 
 # create formatter
