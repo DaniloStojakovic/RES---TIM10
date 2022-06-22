@@ -6,12 +6,13 @@ import Code_Names
 import CollectionDescription
 import HistoricalCollection
 import sys
+from datetime import datetime
 
 class Reader:
 
     def startReader(self):
         while(True):
-            print("Unesite zeljenu operaciju:\n1. Pretraga po kodu\n2. Pretraga po intervalu\n3. Kraj")
+            print("Unesite zeljenu operaciju:\n1. Pretraga po kodu\n2. Pretraga po intervalu\n 3. Kraj")
             komanda = int(input())
             if komanda == 1:
                 self.codeSearch()
@@ -26,9 +27,10 @@ class Reader:
     def codeSearch(self):
         print("Izaberite kod:\n 1.CODE_ANALOG\n 2.CODE_DIGITAL\n 3.CODE_CUSTOM\n 4.CODE_LIMITSET\n 5.CODE_SINGLENOE\n 6.CODE_MULTIPLENODE\n 7.CODE_CONSUMER\n 8.CODE_SOURCE\n")
         code1 = int(input())
-        if code1 == 1:                code = "CODE_ANALOG"
+        if code1 == 1:
+            code = "CODE_ANALOG"
         elif code1 == 2:
-            code = "CODE_DIGITAL"
+           code = "CODE_DIGITAL"
         elif code1 == 3:
             code = "CODE_CUSTOM"
         elif code1 == 4:
@@ -45,14 +47,14 @@ class Reader:
             print("Uneli ste nepostojeci kod!\n\n")
             self.codeSearch()
         dataset = self.GetDataSet(code)
-
         retVal = dbFunctions.DBFunctions.GetValuesByCode(dataset, code)
-        if retVal is not None:
+        if retVal:
+            print(f"Vrijednosti {code}:\n")
             for value in retVal:
                 print(value)
-        
-
-        return retVal
+        else:
+            print("Nema vrijednosti za uneseni kod")
+       
 
     def GetDataSet(self, code ):
         if code == "CODE_ANALOG" or code == "CODE_DIGITAL" :
@@ -83,27 +85,36 @@ class Reader:
         elif code1 == 7:
             code = "CODE_CONSUMER"
         elif code1 == 8:
-            code= "CODE_SOURCE"
+            code = "CODE_SOURCE"
         else:
             print("Uneli ste nepostojeci kod!\n\n")
             self.intervalSearch()
             
-        dataset = self.getDataSet(code)
-            
-        print("Izaberite pocetak intervala: ")
-        pocetak = str(input())
-
-        print("Izaberite kraj intervala: ")
-        kraj = str(input())
-
-        retVal = dbFunctions.DBFunctions.GetValuesByCode(dataset, code)
-        if retVal is not None:
+        dataset = self.GetDataSet(code)
+           
+        time1 = self.TimeConverter()
+        time2 = self.TimeConverter()
+        retVal = dbFunctions.DBFunctions.GetDataByCode(dataset, code,time1, time2)
+        if retVal:
+            print(f"Vrijednosti {code} upisane izmedju {time1} i {time2}:\n")
             for value in retVal:
                 print(value)
-        return retVal
+        else:
+            print("Nema vrijednosti unesenog koda u unesenom vremenskom intervalu")
 
+        
+        
+        
+        
+    def TimeConverter(self):
+        timeFrom = input("Unesi vremenski interval u formatu Y-m-d H:M:S \nod:")
+        try:
+            date = datetime.strptime(timeFrom, '%Y-%m-%d %H:%M:%S')
+            return date
+        except:
+            print("greska")
+            self.timeFromFunction()
 
-
-
-
+chida = Reader()
+chida.startReader()
 

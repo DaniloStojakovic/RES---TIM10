@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 
 class DBFunctions:
+    
 
     def createTable(dataset):
         
@@ -23,12 +24,22 @@ class DBFunctions:
             where code = '{code}'""")
         values = cur.fetchall()
         retVals=[]
-        if values is not None:
-            for value in values:
-                retVals.append(value[0])
-        else:
-            return 
+        for value in values:
+            retVals.append(value[0])
         return retVals
+
+    def GetDataByCode(dataset, code, time1, time2):
+        con = sqlite3.connect('database.db')
+        cur = con.cursor()
+        cur.execute(f"""select  value
+            from DATASET_{dataset}
+            where code = '{code}' AND date_created BETWEEN   '{time1}' AND '{time2}'""")
+        values = cur.fetchall()
+        retVals=[]
+        for value in values:
+            retVals.append(value[0])
+        return retVals
+
 
     def GetLastValue (dataset, code):
         
@@ -42,6 +53,9 @@ class DBFunctions:
         print(retVal)
         con.close()
         return retVal
+       
+   
+    
 
     def Insert(code,value,ds):
         dataset = ds+1
