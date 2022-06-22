@@ -1,3 +1,4 @@
+from os import truncate
 import socket
 import CollectionDescription
 import HistoricalCollection
@@ -5,6 +6,10 @@ import WorkerProperty
 import LoadBalancerClass
 import DataSets
 import Code_Names
+import dbFunctions
+
+print("radi")
+
 class Worker:
     def __init__(self, id, state = False, busy = False ):
        self.id = id
@@ -18,8 +23,10 @@ class Worker:
         ]
 
     def Start(self, data : LoadBalancerClass.LoadBalancerDescriptionCl):
+        if self.busy or not self.state:
+            return
         self.busy= True
-
+        print("proslo")
         datasetID= DataSets.index(data.dataSet)
         
         for item in data.list:
@@ -29,13 +36,13 @@ class Worker:
         cd_statuses = []
         
         for cd in self.collection_descriptions:
-            code_1, code_2 = False, False
+            code1, code2 = False, False
             for wp in cd.historical_collection:
                 if wp.code.name == cd.dataset.value[0]:
-                    code_1 = True
-                elif wp.code.name == cd.dataset.value[1]:
-                    code_2 = True
-            if code_1 and code_2:
+                    code1 = True
+                if wp.code.name == cd.dataset.value[1]:
+                    code2 = True
+            if code1 and code2:
                 cd_statuses.append(True)
             else:
                 cd_statuses.append(False)
@@ -43,14 +50,54 @@ class Worker:
         for cd, ready in zip(self.CD, cd_statuses):
             if ready:
                 for wp in cd.historical_collection:
-                    if(wp.code == Code_Names.codeNames[1]):
-                       print("ovo je za ispis")
-
+                    
+                   
+                    if(self.Validation(wp)):
+                      dbFunctions.DBFunctions.Insert(cd.id, wp.code.name, wp.WorkerValue)
+                    else:
+                        self.CD[cd.id].historicalCollection.reomve[wp]
+        
+        self.busy= False   
        
 
+
+
+    def Validation(self, wp: WorkerProperty):
+        for dataset in range(1, 5):
+            dbFunctions.DBFunctions.createTable(dataset)
+        if wp.code == Code_Names.CODE_DIGITAL:
+            return True
+        else:
+            dataset = self.getDataSet(wp.code)
+            last = dbFunctions.DBFunctions.GetLastValue(dataset, wp.code)
+            if not last:
+                return True
+            return self.Deadband(last, wp.WorkerValue)
+        
+            
+
+        
 
     def Deadband(old: int, new: int):
         dif = abs(old - new)
         if dif> (old * 0.02):
             return True
         return False
+
+    def GetDataSet(self, code ):
+        if code == "CODE_ANALOG" or code == "CODE_DIGITAL" :
+            return 1
+        elif code == "CODE_CUSTOM" or code == "CODE_LIMITSET" :
+            return 2
+        elif code ==  "CODE_SINGLENOE" or code =="CODE_MULTIPLENODE" :
+            return 3
+        elif code == "CODE_CONSUMER" or code == "CODE_SOURCE" :
+            return 4
+      
+aa = LoadBalancerClass.LoadBalancerItemCl("CODE_ANALOG",2)
+bb = LoadBalancerClass.LoadBalancerItemCl( "CODE_DIGITAL",5)
+lista={aa,bb}
+des = LoadBalancerClass.LoadBalancerDescriptionCl(1,lista,1)
+chida=Worker(1,True,False)
+chida.Start(des)
+print("radi")
