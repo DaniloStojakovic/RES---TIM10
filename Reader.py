@@ -66,7 +66,7 @@ class Reader:
             Logger.logger.info('Rider: codeSearch: Vrijednosti {code}:\n')
             print(f"Vrijednosti {code}:\n")
             for value in retVal:
-                Logger.logger.info('Rider: codeSearch: {value}:\n')
+                Logger.logger.info("Rider: codeSearch: {value}:\n")
                 print(value)
         else:
             Logger.logger.info('Rider: codeSearch: Nema vrijednosti za uneseni kod!')
@@ -122,10 +122,10 @@ class Reader:
         time2 = self.TimeConverter()
         retVal = dbFunctions.DBFunctions.GetDataByCode(dataset, code,time1, time2)
         if retVal:
-            Logger.logger.info(f'Rider: intervalSearch: Vrijednosti {code} upisane izmedju {time1} i {time2}:\n')
+            Logger.logger.info(f"Rider: intervalSearch: Vrijednosti {code} upisane izmedju {time1} i {time2}:\n")
             print(f"Vrijednosti {code} upisane izmedju {time1} i {time2}:\n")
             for value in retVal:
-                Logger.logger.info('Rider: intervalSearch: {value}:\n')
+                Logger.logger.info(f"Rider: intervalSearch: {value}:\n")
                 print(value)
         else:
             Logger.logger.info('Rider: codeSearch: Nema vrijednosti za uneseni kod!')
