@@ -5,91 +5,84 @@ import DataSets
 import Code_Names
 import CollectionDescription
 import HistoricalCollection
-import pickle
-import socket
 import sys
 
-sys.path.append('../')
+class Reader:
 
-from _thread import start_new_thread
-
-workerAddress = 'localhost'
-workerPort = 55000
-workerHost = (workerAddress, workerPort)
-
-readerAddress = 'localhost'
-readerPort = 33000
-readerHost = (readerAddress, readerPort)
-
-def getFromWorker(string):
-    workerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print(f"connecting to Worker on [ADDR:PORT] : [{str(workerAddress)}:{str(workerPort)}]")
-    Logger.logger.info(f"connecting to Worker on [ADDR:PORT] : [{str(workerAddress)}:{str(workerPort)}]")
-    workerSocket.connect(workerHost)
-
-    try:
-        workerSocket.send(pickle.dumps(string.encode("utf-8")))
-        reply = workerSocket.recv(1024)
-        workerSocket.close()
-        print(reply.decode("utf-8"))
-        Logger.logger.info(reply.decode("utf-8"))
-        return reply
-
-    except Exception as e:
-        workerSocket.close()
-        print(e)
-        Logger.logger.error(e)
-        return "ERROR"
-
-
-
-def getParameters(data):
-    option = data.split(',')[0]
-    parameter = data.split(',')[1]
-    parameter = parameter[1:]
-    return option,parameter
-
-def multiThreadedConnection(connection): 
-    while True:
-        try:
-            data = connection.recv(1024)
-            if not data:
+    def startReader(self):
+        while(true)
+            print("Unesite zeljenu operaciju:\n1. Pretraga po kodu\n2. Pretraga po intervalu\n 3. Kraj")
+            komanda = int(input())
+            if komanda == 1:
+                self.codeSearch()
+            elif komanda == 2:
+                self.intervalSearch()
+            elif komanda == 3:
                 break
-            data = (data.decode("utf-8"))                                                                     
-            option,parameter = getParameters(data)
-            string = getQuery(option,parameter)
-            reply = getFromWorker(string)
-            connection.sendall(reply)
-        except Exception as e:
-            print(e)
-            Logger.logger.error(e)
-      
-def startReader():
-    readerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-    readerSocket.bind(readerHost)
-    print("Reader started!")
-    Logger.logger.info("Reader started!")
-    while readerSocket:
-        readerSocket.listen()
-        conn, addr = readerSocket.accept()
-        print(f"Connected by {addr}")
-        Logger.logger.info(f"Connected by {addr}")
-        start_new_thread(multiThreadedConnection, (conn, ))
+            else :
+                Logger.logger.error()
 
-if __name__ == '__main__':
-    start_new_thread(startReader())
-    x = input()
-    while x != "x":
-        x = input()
+        def codeSearch(self):
+            print("Izaberite kod:\n 1.CODE_ANALOG\n 2.CODE_DIGITAL\n 3.CODE_CUSTOM\n 4.CODE_LIMITSET\n 5.CODE_SINGLENOE\n 6.CODE_MULTIPLENODE\n 7.CODE_CONSUMER\n 8.CODE_SOURCE\n")
+            code1 = int(input())
+            if code1 == 1:
+                code = "CODE_ANALOG"
+            elif code1 == 2:
+                code = "CODE_DIGITAL"
+            elif code1 == 3:
+                code = "CODE_CUSTOM"
+            elif code1 == 4:
+                code = "CODE_LIMITSET"
+            elif code1 == 5:
+                code = "CODE_SINGLENOE"
+            elif code1 == 6:
+                code = "CODE_MULTIPLENODE"
+            elif code1 == 7:
+                code = "CODE_CONSUMER"
+            elif code1 == 8:
+                code= "CODE_SOURCE"
+            else:
+                print("Uneli ste nepostojeci kod!\n\n")
+                self.codeSearch()
+            dataset = self.GetDataSet(code)
+
+            retVal = db.getDataFromCode(code,dataset)
+        
+
+            return retVal
+
+        def GetDataSet(self, code ):
+            if code == "CODE_ANALOG" or code == "CODE_DIGITAL" :
+                return 1
+            elif code == "CODE_CUSTOM" or code == "CODE_LIMITSET" :
+                return 2
+            elif code ==  "CODE_SINGLENOE" or code =="CODE_MULTIPLENODE" :
+                return 3
+            elif code == "CODE_CONSUMER" or code == "CODE_SOURCE" :
+                return 4
 
 
-def getQuery(option,parameter):
-    string=""
-    if option == "1":
-        string = dbFunctions.createTable(dataset)
-    elif option == "2":
-        string = dbFunctions.Insert(code,value,dataset)
-    elif option == "3":
-        string = dbFunctions.GetLastValue(dataset, code)
+        def intervalSearch(self):
+            db = DBFunctions()
+            print("Unesi kod: ")
+            code = str(input())
 
-    return string
+            if((code != "CODE_ANALOG") and (code != "CODE_DIGITAL") and (code !="CODE_CUSTOM") and (code != "CODE_LIMITSET") and (code != "CODE_SINGLENOE") and (code !="CODE_MULTIPLENODE")and(code!="CODE_CONSUMER")and(code!="CODE_SOURCE")):
+                print("Nepostojeci kod.")
+            
+            dataset = self.getDataSet(code)
+            
+            print("Unesi pocetni interval: ")
+            firstTimestamp = str(input())
+
+            print("Unesi krajnji interval: ")
+            secondTimestamp = str(input())
+
+            retVal = db.getDataFromTimestamp(firstTimestamp,secondTimestamp,dataset)
+            return retVal
+
+
+
+
+
+
