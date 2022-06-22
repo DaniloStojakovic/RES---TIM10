@@ -13,6 +13,7 @@ ITER = cycle(SERVER_POOL)
 def round_robin(iter):
     return next(iter)
 
+
 def which_dataset(code):
         if code == "CODE_ANALOG" or code == "CODE_DIGITAL":
             dataset = 1
@@ -72,73 +73,9 @@ class LoadBalancer(object):
                 WorkerSocket.send(zaSlanje)
                 
 
-                
-
-
-
-        while True:
-            read_list, write_list, exception_list = select.select(self.sockets, [], [])
-            for sock in read_list:
-                # new connection
-                if sock == self.cs_socket:
-                    print ('='*40+'flow start'+'='*39)
-                    self.on_accept()
-                    break
-                # incoming message from a client socket
-                else:
-                    try:
-                        # In Windows, sometimes when a TCP program closes abruptly,
-                        # a "Connection reset by peer" exception will be thrown
-                        data = sock.recv(4096) # buffer size: 2^n
-                        if data:
-                            self.on_recv(sock, data)
-                        else:
-                            self.on_close(sock)
-                            break
-                    except:
-                        sock.on_close(sock)
-                        break
-
-    def on_accept(self):
-        client_socket, client_addr = self.cs_socket.accept()
-        server_ip, server_port = self.select_server(SERVER_POOL, self.algorithm)
-
-        # init a server-side socket
-        ss_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        try:
-            ss_socket.connect((server_ip, server_port))
-            #print ('init server-side socket: %s') % (ss_socket.getsockname(),)
-            #print ('server connected: %s <==> %s') % (ss_socket.getsockname(),(socket.gethostbyname(server_ip), server_port))
-        except:
-            print ("Can't establish connection with remote server, err: %s") % sys.exc_info()[0]
-            print ("Closing connection with client socket %s") % (client_addr,)
-            client_socket.close()
-            return
-
-        self.sockets.append(client_socket)
-        self.sockets.append(ss_socket)
-
-        self.flow_table[client_socket] = ss_socket
-        self.flow_table[ss_socket] = client_socket
-
     def on_recv(self, sock, data):
         print ('recving packets: %-20s ==> %-20s, data: %s') % (sock.getpeername(), sock.getsockname(), [data])
     
-
-    def on_close(self, sock):
-        
-        print ('='*41+'flow end'+'='*40)
-
-        ss_socket = self.flow_table[sock]
-
-        self.sockets.remove(sock)
-        self.sockets.remove(ss_socket)
-
-        sock.close()  # close connection with client
-        ss_socket.close()  # close connection with server
-
-        #del self.flow_table[sock]
-        #del self.flow_table[ss_socket]
 
     def select_server(self, server_list, algorithm):
         if algorithm == 'random':
