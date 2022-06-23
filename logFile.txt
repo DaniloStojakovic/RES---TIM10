@@ -25,3 +25,13 @@ an i poslat
 2022-06-23 09:10:24,635 - logFile - INFO - Worker: Izvrsava se provera popunjenosti datesetova
 2022-06-23 09:10:30,646 - logFile - INFO - Writer: izabrani code je CODE_ANALOG i value je odabran i poslat
 2022-06-23 09:10:30,646 - logFile - INFO - Load Balancer: Upisan novi podatak u load balanceru
+2022-06-23 09:20:57,630 - logFile - INFO - Writer: Writer komponenta se konektovala na load balancer
+2022-06-23 09:21:03,256 - logFile - INFO - Writer: Izabrano je paljenje workera!
+2022-06-23 09:21:03,257 - logFile - INFO - Load Balancer: Upisan novi podatak u load balanceru
+2022-06-23 09:21:03,257 - logFile - INFO - Worker: Worker je inicijalizovan
+2022-06-23 09:21:03,421 - logFile - INFO - Worker: Worker je pokrenut
+2022-06-23 09:21:03,421 - logFile - INFO - Worker: Worker je upravo zauzet
+2022-06-23 09:21:03,421 - logFile - INFO - Worker: Description je raspakovan i uskladisten u lokalnu strukturu
+2022-06-23 09:21:03,421 - logFile - INFO - Worker: Izvrsava se provera popunjenosti datesetova
+2022-06-23 09:21:13,523 - logFile - INFO - Writer: izabrani code je CODE_SOURCE i value je odabran i poslat
+2022-06-23 09:21:13,523 - logFile - INFO - Load Balancer: Upisan novi podatak u load balanceru
