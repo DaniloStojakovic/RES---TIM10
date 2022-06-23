@@ -1,18 +1,11 @@
-import sys
+from multiprocessing import Process
 import socket
-import select
-import random
-from itertools import cycle
 import pickle
+import threading
 from WriterClass import WriterClass
 from Description import Description
-
-SERVER_POOL = [('localhost', 4000), ('localhost', 5000), ('localhost', 6000), ('localhost', 7000)]
-
-ITER = cycle(SERVER_POOL)
-def round_robin(iter):
-    return next(iter)
-
+from Worker import Worker
+import Logger
 
 def which_dataset(code):
         if code == "CODE_ANALOG" or code == "CODE_DIGITAL":
@@ -25,10 +18,8 @@ def which_dataset(code):
             dataset = 4
         return dataset
 
-WorkerSocket = socket.socket()
-host2 = 'localhost'
-port2 = 6969
-WorkerSocket.connect((host2, port2))
+WorkerList1 = []
+WorkerList2 = []
 
 class LoadBalancer(object):
 
@@ -50,44 +41,69 @@ class LoadBalancer(object):
         print ('='*40+'flow start'+'='*39)
         print('Client connected: %s', client_addr)
 
-        ItemList = []
-        brojItema = 0
+        ItemList1 = []
+        ItemList2 = []
+        ItemList3 = []
+        ItemList4 = []
+        brojItema = 2
+        brojacWorkera = 1
+        descID = 1
+        dataset = which_dataset('CODE_ANALOG')
+        Desc1 = Description(brojItema, ItemList1, 1)
+        Desc2 = Description(brojItema, ItemList2, 2)
+        Desc3 = Description(brojItema, ItemList3, 3)
+        Desc4 = Description(brojItema, ItemList4, 4)
 
         while True:
             data = client_socket.recv(4096)
             data1 = pickle.loads(data)
             if not data1:
                 # if data is not received break
-                break
+                continue
             item = WriterClass(data1.code, data1.value)
-            print(f" code:{item.code}  lista vrednost: {item.value}\n")
-            if item.code == 'ON' or item.code == 'OFF':
-                print('a')
+            Logger.logger.info("Load Balancer: Upisan novi podatak u load balanceru")
+            if item.code == 'ON':
+                if item.value in WorkerList1:
+                    print('Worker je vec ukljucen\n')
+                    Logger.logger.info("Load Balancer: Worker je ukljucen u Load Balanceru")
+                    continue
+                else:
+                    print('WORKER UPALJEN\n')
+                    worker = Worker(brojacWorkera, True, False)
+                    brojacWorkera = brojacWorkera + 1
+                    if descID ==1:
+                        Worker1 = Process(target=Worker.Start, args=(worker,Desc1))
+                        descID = descID + 1
+                    elif descID ==2:
+                        Worker1 = Process(target=Worker.Start, args=(worker,Desc2))
+                        descID = descID + 1
+                    elif descID ==3:
+                        Worker1 = Process(target=Worker.Start, args=(worker,Desc3))
+                        descID = descID + 1
+                    elif descID ==4:
+                        Worker1 = Process(target=Worker.Start, args=(worker,Desc4))
+                        descID = 1
+                    Worker1.start()
+                    WorkerList1.append(item.value)
+                
+            elif item.code == 'OFF':
+                print("WORKER UGASEN\n")
+                Logger.logger.info("Load Balancer: Worker je iskljucen u Load Balanceru")
             else:
                 brojItema = brojItema + 1
-                ItemList.append(item)
                 dataset = which_dataset(item.code)
-                Desc = Description(brojItema, ItemList, dataset)
-                poruka =Desc
-                zaSlanje = pickle.dumps(poruka)
-                WorkerSocket.send(zaSlanje)
-                
+                if dataset == 1:
+                    Desc1.listaItema.append(item)
+                elif dataset == 2:
+                    Desc2.listaItema.append(item)
+                elif dataset == 3:
+                    Desc3.listaItema.append(item)
+                elif dataset == 4:
+                    Desc4.listaItema.append(item)
+                    
 
-    def on_recv(self, sock, data):
-        print ('recving packets: %-20s ==> %-20s, data: %s') % (sock.getpeername(), sock.getsockname(), [data])
-    
+if __name__ == "__main__":  # ovo ispod se nece pozvati pri importovanju
+    loadbalancer = LoadBalancer('localhost', 5555, 'round robin')
+    startProces = threading.Thread(target=loadbalancer.start)
 
-    def select_server(self, server_list, algorithm):
-        if algorithm == 'random':
-            return random.choice(server_list)
-        elif algorithm == 'round robin':
-            return round_robin(ITER)
-        else:
-            raise Exception('unknown algorithm: %s' % algorithm)
-
-if __name__ == '__main__':
-    try:
-        LoadBalancer('localhost', 5555, 'round robin').start()
-    except KeyboardInterrupt:
-        print ("Ctrl C - Stopping load_balancer")
-        sys.exit(1)
+    startProces.start()
