@@ -149,3 +149,6 @@ class Reader:
 chida = Reader()
 chida.startReader()
 
+if __name__ == "__main__":  # ovo ispod se nece pozvati pri importovanju
+    reader1 = Reader()
+    reader1.startReader()
