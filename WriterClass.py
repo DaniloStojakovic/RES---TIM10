@@ -1,6 +1,6 @@
 import DataSets
 
-class WriterCl:
+class WriterClass:
   def __init__(self, Code, Value):
     self.code= Code
     self.value = Value
