@@ -50,7 +50,6 @@ class DBFunctions:
                  where date_created = (select max(date_created) from DATASET_{dataset} where code = '{code}')
             and code = '{code}'""")
         retVal = cur.fetchone()
-        print(retVal)
         con.close()
         return retVal
        
