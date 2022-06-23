@@ -61,6 +61,7 @@ class LoadBalancer(object):
                 # if data is not received break
                 continue
             item = WriterClass(data1.code, data1.value)
+            print(f"Provera. Load Balancer primio od Workera kod: {data1.code} i vrednost: {data1.value}\n")
             Logger.logger.info("Load Balancer: Upisan novi podatak u load balanceru")
             if item.code == 'ON':
                 if item.value in WorkerList1:
@@ -75,6 +76,7 @@ class LoadBalancer(object):
                         Worker1 = Process(target=Worker.Start, args=(worker,Desc1))
                         descID = descID + 1
                     elif descID ==2:
+                        
                         Worker1 = Process(target=Worker.Start, args=(worker,Desc2))
                         descID = descID + 1
                     elif descID ==3:
