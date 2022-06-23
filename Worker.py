@@ -3,15 +3,16 @@ import socket
 import CollectionDescription
 import HistoricalCollection
 import WorkerProperty 
-import LoadBalancerClass
+import Description
 import DataSets
 import Code_Names
 import dbFunctions
-
-print("radi")
+import pickle
+import Logger
 
 class Worker:
     def __init__(self, id, state = False, busy = False ):
+       Logger.logger.info("Worker: Worker je inicijalizovan")
        self.id = id
        self.state = state
        self.busy = busy
@@ -22,21 +23,19 @@ class Worker:
             CollectionDescription.CollectionDescription(3, DataSets.DataSet4, [])
         ]
 
-    def Start(self, data : LoadBalancerClass.LoadBalancerDescriptionCl):
+    def Start(self, data : Description):
+        Logger.logger.info("Worker: Worker je pokrenut")
         if self.busy or not self.state:
             return
         self.busy= True
-        print("proslo")
-        datasetID = data.dataSet-1
-        print(datasetID)
-        for item in data.list:
+        Logger.logger.info("Worker: Worker je upravo zauzet")
+        datasetID = data.dataset-1
+        for item in data.listaItema:
             wp= WorkerProperty.WorkerProperty(item.code, item.value)
-            print(item.code)
-            print(item.value)
             self.CD[datasetID].historicalCollection.append(wp)
-        
+        Logger.logger.info("Worker: Description je raspakovan i uskladisten u lokalnu strukturu")
         cd_statuses = []
-        
+        Logger.logger.info("Worker: Izvrsava se provera popunjenosti datesetova")
         for cd in self.CD:
             code1, code2 = False, False
             for wp in cd.historicalCollection:
@@ -55,9 +54,10 @@ class Worker:
                 for wp in cd.historicalCollection:
                     if(self.Validation(wp)):
                       dbFunctions.DBFunctions.Insert(wp.code, wp.WorkerValue, cd.id)
-                      print("treba da upise")
+                      Logger.logger.info("Worker: Upisuje se element u tabelu")
                     else:
                         self.CD[cd.id].historicalCollection.remove(wp)
+                        Logger.logger.info("Worker: Brisu se itemi iz CD koji nisu prosli validaciju")
         
         self.busy= False   
        
@@ -65,8 +65,10 @@ class Worker:
 
 
     def Validation(self, wp: WorkerProperty):
+        Logger.logger.info("Worker: Izvrsava validacija coda pred upis")
         for dataset in range(1, 5):
             dbFunctions.DBFunctions.createTable(dataset)
+            Logger.logger.info("Worker: Kreira se tabela ukoliko nije kreirana")
         if wp.code ==  Code_Names.codeNames[1]:
             return True
         else:
@@ -82,6 +84,7 @@ class Worker:
         
 
     def Deadband(self, old: int, new: int):
+        Logger.logger.info("Worker: Proverava se Deadband")
         dif = abs(old - new)
         if dif> (old * 0.02):
             return True
@@ -97,12 +100,3 @@ class Worker:
         elif code == "CODE_CONSUMER" or code == "CODE_SOURCE" :
             return 4
       
-aa = LoadBalancerClass.LoadBalancerItemCl("CODE_ANALOG",2)
-bb = LoadBalancerClass.LoadBalancerItemCl( "CODE_DIGITAL",5)
-lista=[]
-lista.append(aa)
-lista.append(bb)
-des = LoadBalancerClass.LoadBalancerDescriptionCl(1, lista, 1)
-chida=Worker(1,True,False)
-chida.Start(des)
-print("radi")
